@@ -1,0 +1,21 @@
+{
+	"name": "numGuessOnline",
+	"version": "1.0.0",
+	"description": "A server for playing a higher/lower guessing game!",
+	"author": "Thomas <futuristicblanket@gmail.com>",
+	"contributors": [
+		{
+			"name": "Thomas",
+			"email": "futuristicblanket@gmail.com"
+		}
+	],
+	"scripts": {
+		"start": "node main.js"
+	},
+	"dependencies": {
+		"express": "4.2.x",
+        "body-parser": "1.15.x",
+        "object-assign": "4.1.x"
+	},
+	"private": true
+}
