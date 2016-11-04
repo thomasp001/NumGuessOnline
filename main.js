@@ -125,7 +125,7 @@ app.post("/status", function(req, res){
     //Create variable for JSON to be sent back to client
     var responceJson = {
             "status": "",
-            "timeUntilStart": 0,
+            "timeRemaining": 0,
             "error": "",
             "errorCode": "",
             "winner": {
@@ -159,6 +159,7 @@ app.post("/status", function(req, res){
             //Returned if the user is currently in a game being played. If the client gets this responce than they should be guessing.
             responceJson.status = "inProgress";
             responceJson.errorCode = "0";
+            responceJson.timeRemaining = 60 - timeDone;
         }
         else if (game && !(gamePlayed) && gameWon) {
             //Returned if the game is over but the game isn't waiting for users to join yet either. This also returns which user won.
@@ -172,7 +173,7 @@ app.post("/status", function(req, res){
         else if (!(game) && !(gamePlayed) && !(gameWon) && (inGame.indexOf(id) >= 0)) {
             //Returned if the user is currently in a game but the game hasn't started yet.
             responceJson.status = "waiting";
-            responceJson.timeUntilStart = timeUntilNextGame;
+            responceJson.timeRemaining = timeUntilNextGame;
             responceJson.errorCode = "0";
         }
     }
@@ -267,13 +268,14 @@ app.post("/guess", function(req, res) {
                         "errorCode": ""
                        };
     //Make sure that both guess and id keys exist
+    responce.guess = Number(responce.guess);
     if (!("id" in responce) || !("guess" in responce)) {
         responceJson.success = false;
         responceJson.error = "No key for guess and/or id in JSON!";
         responceJson.errorCode = "1";
     }
     //Also check that if they do exist they are the correct datatype
-    else if (!(typeof responce.id === "string") || !(typeof responce.guess === "number")) {
+    else if (!(typeof responce.id == "string") || !(typeof responce.guess == "number")) {
         responceJson.success = false;
         responceJson.error = "id is not a string and/or guess is not a number";
         responceJson.errorCode = "4";
@@ -304,7 +306,7 @@ app.post("/guess", function(req, res) {
             3 = Game Over
             */
             //If the user gets the correct answer then let them know, also reset the game!
-            if (theNumber === guess) {
+            if (theNumber == guess) {
                 responceJson.timeRemaing = 0;
                 responceJson.result = "Correct, you got it right, the answer was " + theNumber.toString() + "!";
                 responceJson.resultCode = "0";
@@ -318,7 +320,7 @@ app.post("/guess", function(req, res) {
                 timeDone = 0;
                 gameWon = true;
             }
-            //If the number gessed is lower than the answer...
+            //If the number guessed is lower than the answer...
             else if (guess > theNumber) {
                 responceJson.timeRemaing = 60 - timeDone;
                 responceJson.result = "Lower!";
@@ -390,7 +392,7 @@ function update() {
         gameWon = true;
         game = true;
         winnerName = "nobody";
-        winnerTime = 0;
+        winnerTime = 60;
         winnerTries = 0;
         timeUntilNext = 10;
     }
