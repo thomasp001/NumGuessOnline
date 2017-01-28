@@ -49,6 +49,10 @@ var winningCeremonyLength = 10 //Default is 10 seconds, must be 1 second or grea
 //Which port to run the web server on
 var port = 80 //Default is 80
 
+//The highest and lowest possible number to be generated
+var minNum = 1 //Default is 1
+var maxNum = 500 //Default is 500
+
 //End customisible properties
 
 //Import the express framework into this node.js environment
@@ -408,8 +412,8 @@ function update() {
         //If their are users in the game then lets go
         if (inGame.length > 0) {
             //New game setup
-            //Generate number between 1 and 500
-            theNumber = Math.floor((Math.random() * 500) + 1);
+            //Generate number 
+            theNumber = Math.floor((Math.random() * maxNum) + minNum);
             game = true;
             gamePlayed = true;
             timeDone = 0;
