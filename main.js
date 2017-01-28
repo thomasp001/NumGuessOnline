@@ -16,6 +16,41 @@ License: MIT
 
 */
 
+/*
+   ___          _                  _                  
+  / __\   _ ___| |_ ___  _ __ ___ (_)___  ___         
+ / / | | | / __| __/ _ \| '_ ` _ \| / __|/ _ \        
+/ /__| |_| \__ \ || (_) | | | | | | \__ \  __/        
+\____/\__,_|___/\__\___/|_| |_| |_|_|___/\___|        
+  _   _  ___  _   _ _ __                              
+ | | | |/ _ \| | | | '__|                             
+ | |_| | (_) | |_| | |                                
+  \__, |\___/ \__,_|_|                                
+ _|___/      _        _ _       _   _               _ 
+(_)_ __  ___| |_ __ _| | | __ _| |_(_) ___  _ __   / \
+| | '_ \/ __| __/ _` | | |/ _` | __| |/ _ \| '_ \ /  /
+| | | | \__ \ || (_| | | | (_| | |_| | (_) | | | /\_/ 
+|_|_| |_|___/\__\__,_|_|_|\__,_|\__|_|\___/|_| |_\/   
+                                                      
+*/
+
+//Maximum number of players
+var maxPlayers = 5 //Default is 5 players, must be 1 or greater
+
+//Time in seconds for game length
+var gameLength = 60 //Default is 60 seconds, must be 1 second or greater
+
+//How long users have to join before a game starts
+var lobbyLength = 20 //Default is 20 seconds, must be 1 second or greater
+
+//Amount of time the winner is announced, measured in seconds
+var winningCeremonyLength = 10 //Default is 10 seconds, must be 1 second or greater
+
+//Which port to run the web server on
+var port = 80 //Default is 80
+
+//End customisible properties
+
 //Import the express framework into this node.js environment
 var express = require("express");
 //Import the body parser framework into this node.js environment
@@ -43,7 +78,7 @@ var gamePlayed = false;
 //Has the game finished and winner is being annoounced?
 var gameWon = false;
 //Time until the next game
-var timeUntilNextGame = 20;
+var timeUntilNextGame = lobbyLength;
 //Time the game has been running
 var timeDone = 0;
 //The number being guessed
@@ -159,7 +194,7 @@ app.post("/status", function(req, res){
             //Returned if the user is currently in a game being played. If the client gets this responce than they should be guessing.
             responceJson.status = "inProgress";
             responceJson.errorCode = "0";
-            responceJson.timeRemaining = 60 - timeDone;
+            responceJson.timeRemaining = gameLength - timeDone;
         }
         else if (game && !(gamePlayed) && gameWon) {
             //Returned if the game is over but the game isn't waiting for users to join yet either. This also returns which user won.
@@ -230,7 +265,7 @@ app.post("/joinGame", function(req, res){
             responceJson.timeUntilStart = timeUntilNextGame;
         }
         //Make sure the game isn't full
-        else if ((responce.id in users) && (inGame.indexOf(responce.id) === -1) && (inGame.length > 4)) {
+        else if ((responce.id in users) && (inGame.indexOf(responce.id) === -1) && (inGame.length >= maxPlayers)) {
             responceJson.success = false;
             responceJson.error = "The game is full, please wait!";
             responceJson.errorCode = "3";
@@ -313,7 +348,7 @@ app.post("/guess", function(req, res) {
                 responceJson.success = true;
                 responceJson.errorCode = "0";
                 gamePlayed = false;
-                timeUntilNext = 10;
+                timeUntilNext = winningCeremonyLength;
                 winnerTime = timeDone;
                 winnerTries = 0;
                 winnerName = users[id].username;
@@ -322,7 +357,7 @@ app.post("/guess", function(req, res) {
             }
             //If the number guessed is lower than the answer...
             else if (guess > theNumber) {
-                responceJson.timeRemaing = 60 - timeDone;
+                responceJson.timeRemaing = gameLength - timeDone;
                 responceJson.result = "Lower!";
                 responceJson.resultCode = "1";
                 responceJson.success = true;
@@ -330,7 +365,7 @@ app.post("/guess", function(req, res) {
             }
             //If the number gessed is higher than the answer...
             else if (guess < theNumber) {
-                responceJson.timeRemaing = 60 - timeDone;
+                responceJson.timeRemaing = gameLength - timeDone;
                 responceJson.result = "Higher!";
                 responceJson.resultCode = "2";
                 responceJson.success = true;
@@ -382,19 +417,19 @@ function update() {
         }
         //Otherwise reset the timer!
         else {
-            timeUntilNextGame = 20;
+            timeUntilNextGame = lobbyLength;
         }
     }
     //If 60 seconds passed with no correct answer reset game
-    else if (timeDone >= 60 && gamePlayed) {
+    else if (timeDone >= gameLength && gamePlayed) {
         //Game run out of time with not answer
         gamePlayed = false;
         gameWon = true;
         game = true;
         winnerName = "nobody";
-        winnerTime = 60;
+        winnerTime = gameLength;
         winnerTries = 0;
-        timeUntilNext = 10;
+        timeUntilNext = winningCeremonyLength;
     }
     //Countdown time while winner is announced
      else if (game && !(gamePlayed) && (gameWon) && (timeUntilNext >= 1)) {
@@ -416,7 +451,7 @@ function update() {
         game = false;
         gameWon = false;
         gamePlayed = false;
-        timeUntilNextGame = 20;
+        timeUntilNextGame = lobbyLength;
         //Reset the time of all users who played
         for (var i = 0; i < inGame.length; i++) {
             users[inGame[i]].time = Date.now() / 1000 | 0;
@@ -445,7 +480,7 @@ setInterval(update, 1000);
 setInterval(deleteInactiveUsers, 60000);
 
 //Lets clients access the api on port 80.
-app.listen(process.env.PORT || 80);
+app.listen(port);
 
 //Informs the user running the script that the server is working!
-console.log("Server running @ 127.0.0.1:80");
+console.log("Server running @ 127.0.0.1:" + port);
