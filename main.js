@@ -47,7 +47,7 @@ var lobbyLength = 20 //Default is 20 seconds, must be 1 second or greater
 var winningCeremonyLength = 10 //Default is 10 seconds, must be 1 second or greater
 
 //Which port to run the web server on
-var port = 80 //Default is 80
+var port = process.env.PORT || 80  //Default is 80
 
 //The highest and lowest possible number to be generated
 var minNum = 1 //Default is 1
@@ -62,7 +62,7 @@ var bodyParser = require("body-parser");
 //Import a library that enables me to merge two objects together
 var objectAssign = require("object-assign");
 
-//Create a new variable called app and give it the express object as contents. This means we now have a clone of the express object that we can modify without messing any things up.
+//Create a new variable called and give it the express object as contents. This means we now have a clone of the express object that we can modify without messing any things up.
 var app = express();
 
 //Have our express app use the body-parser (makes is easier to handle the information from post requests)
